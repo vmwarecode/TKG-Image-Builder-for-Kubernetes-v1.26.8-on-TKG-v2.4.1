@@ -1,0 +1,29 @@
+---
+- name: Gather variables
+  include_vars: main.yml
+  tags:
+    - always
+- import_tasks: packages.yml
+- import_tasks: kernel-blacklist.yml
+- import_tasks: mounts.yml
+- import_tasks: profile.yml
+- import_tasks: auditd-config.yml
+- import_tasks: logindefs.yml
+- import_tasks: pwquality.yml
+- import_tasks: limits.yml
+- import_tasks: sshd-config.yml
+- import_tasks: sysctl.yml
+- import_tasks: banner.yml
+- import_tasks: journald.yml
+- import_tasks: logrotate.yml
+- import_tasks: pam.yml
+- import_tasks: grub.yml
+- import_tasks: rsyslog.yml
+- import_tasks: apt.yml
+- import_tasks: users.yml
+- import_tasks: permissions.yml
+- import_tasks: apparmor.yml
+- import_tasks: sudo.yml
+- import_tasks: aide.yml
+- import_tasks: timesyncd.yml
+- import_tasks: audit-rules.yml

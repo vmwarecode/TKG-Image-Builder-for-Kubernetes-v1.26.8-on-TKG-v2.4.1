@@ -1,0 +1,17 @@
+- name: check sticky bit on dirs
+  # Avoid checking proc but check all other sticky bits... proc can change during a run of this accumulating the register stuff
+  # command: find / -not -path /var/lib/kubelet/pods/* -type d -perm -002 ! -perm -1000
+  command: find / -path /proc -prune -o -type d -perm -002 ! -perm -1000 -print
+  register: pub_dir_no_sticky_bit
+  tags:
+  - medium
+
+- name: print sticky bit message
+  debug:
+    msg: >
+      Public directories with sticky bit not set.
+      {{ pub_dir_no_sticky_bit.stdout }}
+  when:
+    pub_dir_no_sticky_bit is defined
+  tags:
+  - medium

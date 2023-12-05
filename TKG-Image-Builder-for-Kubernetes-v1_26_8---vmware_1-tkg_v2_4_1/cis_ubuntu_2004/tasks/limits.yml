@@ -1,0 +1,5 @@
+- name: /etc/security/limits.d/maxlogins.conf
+  lineinfile:
+    dest: /etc/security/limits.d/maxlogins.conf
+    create: yes
+    line: '* hard core 0'

@@ -1,0 +1,215 @@
+- name: "set umask"
+  lineinfile:
+    dest: "/etc/profile"
+    regexp: "^(#)?umask .*"
+    line: "umask 077"
+    state: present
+
+- name: "rsyslog.conf file permissions"
+  lineinfile:
+    dest: /etc/rsyslog.conf
+    regex: "{{ item }}"
+    state: absent
+  with_items:
+    - \$FileOwner.*
+    - \$FileGroup.*
+    - \$FileCreateMode.*
+    - \$DirCreateMode.*
+    - \$Umask.*
+    - \$PrivDropToUser.*
+    - \$PrivDropToGroup.*
+
+- name: "permissions: /var/log /usr/lib/tmpfiles.d/00rsyslog.conf"
+  lineinfile:
+    path: '/usr/lib/tmpfiles.d/00rsyslog.conf'
+    regexp: '(^z \/var\/log)\s+(\d+)\s+(.*$)'
+    line: '\1 0750 root syslog -'
+    backrefs: yes
+
+- name: "permissions: /var/log /usr/lib/tmpfiles.d/var.conf"
+  lineinfile:
+    path: '/usr/lib/tmpfiles.d/var.conf'
+    regexp: '(^d \/var\/log)\s+(\d+)\s+(.*$)'
+    line: '\1 0750 root syslog -'
+    backrefs: yes
+
+- name: "permissions: cron directories"
+  file:
+    path: "{{ item }}"
+    owner: root
+    group: root
+    mode: "0700"
+    state: directory
+  with_items: 
+  - /etc/cron.d
+  - /etc/cron.daily
+  - /etc/cron.hourly
+  - /etc/cron.monthly
+  - /etc/cron.weekly
+
+- name:  "permissions: cron/ssh/passwd- files"
+  file:
+    path: "{{ item }}"
+    owner: root
+    group: root
+    mode: "0600"
+    state: file
+  with_items:
+  - /etc/ssh/sshd_config
+  - /etc/crontab
+  
+- name: "permissions: /var/log/wtmp"
+  lineinfile:
+    path: '/usr/lib/tmpfiles.d/var.conf'
+    regexp: '(^f \/var\/log\/wtmp)\s+(\d+)(.*)'
+    line: 'f /var/log/wtmp 0640 \3'
+    backrefs: yes
+
+- name: "permissions: /var/log/btmp"
+  lineinfile:
+    path: '/usr/lib/tmpfiles.d/var.conf'
+    regexp: '(^f \/var\/log\/btmp)\s+(\d+)(.*)'
+    line: '\1 0640 \3'
+    backrefs: yes
+
+- name: "permissions: /var/log/lastlog"
+  lineinfile:
+    path: '/usr/lib/tmpfiles.d/var.conf'
+    regexp: '(^f \/var\/log\/lastlog)\s+(\d+)(.*)'
+    line: '\1 0640 \3'
+    backrefs: yes
+
+- name: "permissions: /var/log/apt/history.log"
+  lineinfile:
+    path: '/usr/lib/tmpfiles.d/var.conf'
+    line: f /var/log/apt/history.log 0640 root root -
+
+- name: "permissions: /etc/cron.allow"
+  file:
+    path: /etc/cron.allow
+    owner: root
+    group: root
+    mode: '0600'
+    state: touch
+
+- name: "permissions: remove /var/lib/lxd/"
+  file:
+    path: /var/lib/lxd/
+    state: absent
+
+- name: "permissions: /home/ubuntu"
+  file:
+    path: /home/ubuntu
+    owner: ubuntu
+    group: ubuntu
+    mode: '0750'
+    state: directory
+  when: packer_builder_type.startswith('amazon')
+
+- name: "permissions: umask"
+  lineinfile:
+    path: /etc/profile.d/set_umask.sh
+    line: umask 027
+    create: yes
+
+- name: "permissions: set /home/ubuntu permission"
+  file:
+    path: /home/ubuntu
+    mode: "0750"
+  when: packer_builder_type.startswith('amazon')
+
+- name: "permissions: get skel file"
+  command: find  /etc/skel/ -type f -perm /137
+  register: skel_files
+
+- name: "permissions: set skel file"
+  file:
+    path: "{{ item }}"
+    mode: '0640'
+  with_items: "{{ skel_files.stdout_lines }}"
+
+- name: "permissions: get audit configuration files"
+  command: find /etc/audit/audit.rules /etc/audit/auditd.conf /etc/audit/rules.d/ -type f
+  register: audit_conf_files
+
+- name: "permissions: set audit configuration files"
+  file:
+    path: "{{ item }}"
+    owner: root
+    group: root
+    mode: "0640"
+  with_items: "{{ audit_conf_files.stdout_lines }}"
+
+- name: "permissions:set dmesg log file permission"
+  lineinfile:
+    path: '/etc/systemd/system/multi-user.target.wants/dmesg.service'
+    insertafter: '\[Service\]'
+    line: 'UMask=0077'
+
+
+- name: "permissions: get bin/lib file"
+  command: |
+    find \
+    /bin /sbin /usr/bin /usr/sbin /usr/local/bin /usr/local/sbin /lib /usr/lib /lib64 \
+    -type f \
+    -a \( ! -group root -o ! -user root -o -perm /022 \)
+  register: sys_lib_files
+ 
+- name: "permissions: set bin/lib file"
+  file:
+    path: "{{ item }}"
+    owner: root
+    group: root
+    mode: "0755"
+    state: file
+  with_items: "{{ sys_lib_files.stdout_lines }}"
+
+- name: "permissions: get bin/lib dirs"
+  command: |
+    find \
+    /bin /sbin /usr/bin /usr/sbin /usr/local/bin /usr/local/sbin /lib /usr/lib /lib64 \
+    -type d \
+    ! -type l \
+    -a \( ! -group root -o ! -user root -o -perm /022 \)
+  register: sys_lib_directories
+ 
+- name: "permissions: set bin/lib dirs"
+  file:
+    path: "{{ item }}"
+    owner: root
+    group: root
+    mode: "0755"
+    state: directory
+  with_items: "{{ sys_lib_directories.stdout_lines }}"
+
+- name: "permissions: get log file"
+  command: find  /var/log -type f
+  register: log_files
+
+- name: "permissions: set log file"
+  file:
+    path: "{{ item }}"
+    mode: 0640
+  with_items: "{{ log_files.stdout_lines }}"
+
+- name: "permissions: get nouser"
+  command:
+    cmd:  "find / -xdev -nouser  ! -path /var/lib/containerd/*"
+  register: nouser
+
+- name: "permissions: set nouser"
+  file:
+    path: "{{ item }}"
+    owner: root
+  with_items:  "{{ nouser.stdout_lines }}"
+
+- name: "permissions: get nogroup"
+  command:
+    cmd:  "find / -xdev -nogroup ! -path /var/lib/containerd/*"
+  register: nogroup
+
+- name: "permissions: set nogroup"
+  file:
+    path: "{{ item }}"
+    group: root
+  with_items:  "{{ nogroup.stdout_lines }}"

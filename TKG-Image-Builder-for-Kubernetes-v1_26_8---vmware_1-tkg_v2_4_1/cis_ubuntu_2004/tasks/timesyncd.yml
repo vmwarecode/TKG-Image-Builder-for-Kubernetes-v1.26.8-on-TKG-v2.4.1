@@ -1,0 +1,30 @@
+- name: verify timesyncd.conf exists
+  stat:
+    path: "/etc/systemd/timesyncd.conf"
+  register: timesyncd_conf
+
+- name: "timesyncd: configure NTP"
+  lineinfile:
+    dest: /etc/systemd/timesyncd.conf
+    regex: "^[#]?NTP="
+    line: "NTP={{ timdesyncd_ntp }}"
+  when:
+  - timesyncd_conf.stat.exists
+  - timdesyncd_ntp != ''
+
+- name: "timesyncd: configure FallbackNTP"
+  lineinfile:
+    dest: /etc/systemd/timesyncd.conf
+    regex: "^[#]?FallbackNTP="
+    line: "FallbackNTP={{ timdesyncd_fallbackntp }}"
+  when:
+  - timesyncd_conf.stat.exists
+  - timdesyncd_fallbackntp != ''
+
+- name: "timesyncd: configure RootDistanceMax"
+  lineinfile:
+    dest: /etc/systemd/timesyncd.conf
+    regex: "^[#]?RootDistanceMax="
+    line: "RootDistanceMax=1"
+  when:
+  - timesyncd_conf.stat.exists

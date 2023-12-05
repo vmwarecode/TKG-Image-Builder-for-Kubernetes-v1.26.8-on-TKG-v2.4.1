@@ -1,0 +1,96 @@
+install_aide: false
+install_clamav: false
+clamav_database_mirrors: []
+install_chrony: true
+install_systemd_timesyncd: false
+
+# Skip, fixed upstream in image builder
+install_protect_kernel_defaults: false
+# For things like "not azure" logic in modprobe
+packer_builder_type: none
+
+forward_journald_to_syslog: true
+
+hold_packages: true
+syslog_host: ""
+syslog_port: ""
+offline_install: "{{ lookup('env','OFFLINE_INSTALL') == 'yes' }}"
+install_packages:
+- apparmor
+- apparmor-profiles
+- apparmor-utils
+- audispd-plugins
+- auditd
+- iptables-persistent
+- libpam-pwquality
+- libpwquality-common
+- openssh-client
+- openssh-server
+remove_packages:
+- at
+- avahi-daemon
+- chromium-browser
+- dovecot-core
+- landscape
+- landscape-common
+- lxd
+- pollinate
+- postfix
+- screen
+- telnet
+- telnetd
+- tftpd
+# - ufw
+# - unattended-upgrades
+- wall
+login_banner: |
+  Authorized uses only. All activity may be monitored and reported.
+disabled_modules:
+- cramfs
+- dccp
+- freevxfs
+- hfs
+- hfsplus
+- jffs2
+- rds
+- sctp
+- tipc
+- usb-storage
+diabled_apparmor_profile:
+- /etc/apparmor.d/apache2.d/phpsysinfo
+- /etc/apparmor.d/bin.ping
+- /etc/apparmor.d/sbin.klogd
+- /etc/apparmor.d/sbin.syslog-ng
+- /etc/apparmor.d/sbin.syslogd
+- /etc/apparmor.d/usr.bin.chromium-browser
+- /etc/apparmor.d/usr.bin.man
+- /etc/apparmor.d/usr.lib.dovecot.anvil
+- /etc/apparmor.d/usr.lib.dovecot.auth
+- /etc/apparmor.d/usr.lib.dovecot.config
+- /etc/apparmor.d/usr.lib.dovecot.deliver
+- /etc/apparmor.d/usr.lib.dovecot.dict
+- /etc/apparmor.d/usr.lib.dovecot.dovecot-auth
+- /etc/apparmor.d/usr.lib.dovecot.dovecot-lda
+- /etc/apparmor.d/usr.lib.dovecot.imap
+- /etc/apparmor.d/usr.lib.dovecot.imap-login
+- /etc/apparmor.d/usr.lib.dovecot.lmtp
+- /etc/apparmor.d/usr.lib.dovecot.log
+- /etc/apparmor.d/usr.lib.dovecot.managesieve
+- /etc/apparmor.d/usr.lib.dovecot.managesieve-login
+- /etc/apparmor.d/usr.lib.dovecot.pop3
+- /etc/apparmor.d/usr.lib.dovecot.pop3-login
+- /etc/apparmor.d/usr.lib.dovecot.ssl-params
+- /etc/apparmor.d/usr.sbin.avahi-daemon
+- /etc/apparmor.d/usr.sbin.dnsmasq
+- /etc/apparmor.d/usr.sbin.dovecot
+- /etc/apparmor.d/usr.sbin.identd
+- /etc/apparmor.d/usr.sbin.mdnsd
+- /etc/apparmor.d/usr.sbin.nmbd
+- /etc/apparmor.d/usr.sbin.nscd
+- /etc/apparmor.d/usr.sbin.rsyslogd
+- /etc/apparmor.d/usr.sbin.smbd
+- /etc/apparmor.d/usr.sbin.smbldap-useradd
+- /etc/apparmor.d/usr.sbin.tcpdump
+- /etc/apparmor.d/usr.sbin.traceroute
+timdesyncd_fallbackntp: ''
+timdesyncd_ntp: ''

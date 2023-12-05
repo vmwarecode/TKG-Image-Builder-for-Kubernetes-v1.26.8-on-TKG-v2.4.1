@@ -1,0 +1,72 @@
+- name: "packages: apt update"
+  apt:
+    force_apt_get: True
+    update_cache: True
+    upgrade: dist
+  register: apt_lock_status
+  until: apt_lock_status is not failed
+  retries: 5
+  delay: 10
+  when: not offline_install | bool
+
+- name: "packages: apt install"
+  apt:
+    name: "{{ install_packages }}"
+    state: present
+    force_apt_get: yes
+
+- name: "packages: chrony"
+  ansible.builtin.apt:
+    name: chrony
+    state: present
+  when:
+    install_chrony | bool
+
+- name: "packages: systemd-timesyncd"
+  service:
+    name: systemd-timesyncd
+    enabled: yes
+  when:
+    install_systemd_timesyncd | bool
+
+- name: "packages: clamav"
+  package:
+    name: 
+    - clamav 
+    - clamav-daemon
+    state: present
+  when:
+    install_clamav | bool
+
+- name: "packages: clamav: private mirror"
+  lineinfile:
+    path: /etc/clamav/freshclam.conf
+    line: "PrivateMirror {{ item }}"
+  with_items: "{{ clamav_database_mirrors }}"
+  when: 
+  - install_clamav | bool
+  - clamav_database_mirrors is defined and (clamav_database_mirrors | length>0)
+
+- name: "packages: hold installed packages"
+  dpkg_selections:
+    name: "{{ item }}"
+    selection: hold
+  with_items: "{{ install_packages }}"
+  when:
+    hold_packages | bool
+
+- name: "packages: unhold packages to be uninstalled"
+  dpkg_selections:
+    name: "{{ item }}"
+    selection: install
+  with_items: "{{ remove_packages }}"
+  when:
+    hold_packages | bool
+
+- name: "packages: apt remove"
+  apt:
+    name: "{{ remove_packages }}"
+    state: absent
+    force_apt_get: yes
+    purge: yes
+    autoclean: yes

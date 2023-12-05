@@ -1,0 +1,43 @@
+- name: "auditd: copy mci audit rules"
+  copy:
+    src: "mci-audit.rules"
+    dest: /etc/audit/rules.d/mci-cis.rules
+    group: root
+    owner: root
+    mode: "0640"
+  notify:
+  - augenrules load
+
+- name: "auditd: finalize audit rules"
+  copy:
+    src: 99-finalize.rules
+    dest:  /etc/audit/rules.d/99-finalize.rules
+    group: root
+    owner: root
+    mode: "0640"
+    
+- name: "auditd: delete dynamic audit file"
+  file:
+    path: /etc/audit/rules.d/dynamic-mci.rules
+    state: absent
+
+- name: "auditd: get privileged commands"
+  command: |
+    find  \
+    / -xdev \
+    \( -perm -4000 -o -perm -2000 \) -type f
+  register: privileged_commands
+
+- name: "auditd: set privileged commands in dynamic-mci.rules"
+  lineinfile:
+    path: /etc/audit/rules.d/dynamic-mci-cis.rules
+    line: "-a always,exit -F path={{ item }}  -F perm=x -F auid>=1000 -F auid!=4294967295 -k privileged"
+    create: yes
+  with_items: "{{ privileged_commands.stdout_lines }}"
+  when:
+    - item is not match("/run/containerd/io.containerd.runtime.v2.task/k8s.io/*")
+    - item is not match("/snap/core*")
+    - item is not match("/snap/snapd/*")
+    - item is not match("/var/lib/containerd/*")
+    - item is not match("/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/*")
+    - item is not match("/var/lib/kubelet/pods/*")

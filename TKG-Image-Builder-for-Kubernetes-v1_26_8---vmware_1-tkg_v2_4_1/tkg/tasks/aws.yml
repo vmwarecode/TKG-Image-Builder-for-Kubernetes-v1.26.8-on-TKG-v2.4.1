@@ -1,0 +1,13 @@
+---
+- name: Enforce soft and hard limit for open files in system
+  lineinfile:
+    path: /etc/security/limits.conf
+    state: present
+    line: '*  - nofile  32768'
+
+- name: Enforce session required
+  lineinfile:
+    path: /etc/pam.d/common-session
+    state: present
+    line: session required pam_limits.so
+  when: ansible_os_family == "Debian"

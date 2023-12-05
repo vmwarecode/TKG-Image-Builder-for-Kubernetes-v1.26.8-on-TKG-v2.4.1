@@ -1,0 +1,23 @@
+- name: "Remove containerd.rules"
+  file:
+    path: "/etc/audit/rules.d/containerd.rules"
+    state: absent
+
+- name: "/etc/audit/auditd.conf"
+  lineinfile:
+    dest: /etc/audit/auditd.conf
+    regexp: '^#?{{ item.parameter }}\s*='
+    line: "{{ item.parameter }} = {{ item.value }}"
+  with_items:
+  - parameter: space_left_action
+    value: email
+  - parameter: action_mail_acct
+    value: root
+  - parameter: log_group
+    value: root
+  - parameter: disk_full_action
+    value: syslog
+  notify:
+    - restart auditd
+  tags:
+  - auditd.conf

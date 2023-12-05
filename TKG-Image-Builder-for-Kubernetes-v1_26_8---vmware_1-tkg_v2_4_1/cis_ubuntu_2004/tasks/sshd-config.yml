@@ -1,0 +1,48 @@
+- name: "/etc/ssh/sshd_config"
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    state: present
+    regexp: "^{{ item.key }} "
+    validate: '/usr/sbin/sshd -T -f %s'
+    line: "{{ item.key }} {{ item.value }} "
+  with_items:
+  - key: Banner
+    value: /etc/issue.net
+  - key: Ciphers
+    value: chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr
+  - key: ClientAliveCountMax
+    value: 1 
+  - key: ClientAliveInterval
+    value: 300 
+  - key: MACs
+    value: hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512,hmac-sha2-256
+  - key: PermitEmptyPasswords
+    value: "no" 
+  - key: PermitUserEnvironment
+    value: "no" 
+  - key: Protocol
+    value: 2 
+  - key: UsePAM
+    value: "yes" 
+  - key: X11Forwarding
+    value: "no"
+  - key: MaxAuthTries
+    value: 4
+  - key: AllowTcpForwarding
+    value: "no"
+  - key: MaxStartups
+    value: "10:30:60"
+  - key: MaxSessions
+    value: 4
+  - key: LoginGraceTime
+    value: 60
+  - key: KexAlgorithms
+    value: curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group14-sha256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512,ecdh-sha2-nistp521,ecdh-sha2-nistp384,ecdh-sha2-nistp256,diffie-hellman-group-exchange-sha256
+
+- name: "/etc/ssh/sshd_config: ipv6"
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    state: present
+    regexp: "^AddressFamily "
+    validate: '/usr/sbin/sshd -T -f %s'
+    line: "AddressFamily any"

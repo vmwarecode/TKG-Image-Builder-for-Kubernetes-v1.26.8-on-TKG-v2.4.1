@@ -1,0 +1,28 @@
+- name: modprobe
+  modprobe:
+    name: "{{ item }}"
+    state: absent
+  with_items: "{{ disabled_modules }}"
+
+- name: modprobe.d conf
+  template:
+    src: files/mci-modprobe.conf.j2
+    dest: /etc/modprobe.d/mci-modprobe.conf
+    group: root
+    owner: root
+    mode: 0644
+
+- name: modprobe - not azure
+  modprobe:
+    name: "udf"
+    state: absent
+  when:
+    not packer_builder_type.startswith('azure')
+
+- name: modprobe.d conf - not azure
+  lineinfile:
+    dest: /etc/modprobe.d/mci-modprobe.conf
+    line: install udf /bin/true
+    insertbefore: EOF
+  when:
+    not packer_builder_type.startswith('azure')

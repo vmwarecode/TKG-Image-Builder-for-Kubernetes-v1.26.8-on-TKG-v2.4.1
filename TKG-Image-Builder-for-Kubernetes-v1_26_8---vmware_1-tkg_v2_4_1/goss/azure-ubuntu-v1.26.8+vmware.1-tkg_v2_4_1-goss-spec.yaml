@@ -1,0 +1,140 @@
+file:
+    /usr/local/sbin/provision-kubernetes-dsr:
+        exists: true
+        filetype: file
+        contents: null
+package:
+    apparmor:
+        installed: true
+    apparmor-utils:
+        installed: true
+    apt-transport-https:
+        installed: true
+    auditd:
+        installed: true
+    chrony:
+        installed: true
+    conntrack:
+        installed: true
+    curl:
+        installed: true
+    ebtables:
+        installed: true
+    gnupg:
+        installed: true
+    jq:
+        installed: true
+    libnetfilter-acct1:
+        installed: true
+    libnetfilter-cttimeout1:
+        installed: true
+    libnetfilter-log1:
+        installed: true
+    linux-cloud-tools-virtual:
+        installed: true
+    linux-tools-virtual:
+        installed: true
+    ntp:
+        installed: false
+    open-vm-tools:
+        installed: true
+    python3-distutils:
+        installed: true
+    python3-netifaces:
+        installed: true
+    python3-pip:
+        installed: true
+    socat:
+        installed: true
+service:
+    apt-daily-upgrade.timer:
+        enabled: false
+        running: false
+    apt-daily.timer:
+        enabled: false
+        running: false
+    auditd:
+        enabled: true
+        running: true
+    chrony:
+        enabled: true
+        running: true
+    chronyd:
+        enabled: true
+        running: true
+    conntrackd:
+        enabled: false
+        running: false
+    containerd:
+        enabled: true
+        running: true
+    dockerd:
+        enabled: false
+        running: false
+    kubelet:
+        enabled: true
+        running: false
+command:
+    /opt/cni/bin/host-device 2>&1 | awk -F' ' '{print substr($4,2); }':
+        exit-status: 0
+        stdout:
+            - 1.1.1+vmware.28
+        stderr: []
+        timeout: 0
+    containerd --version | awk -F' ' '{print substr($3,2); }':
+        exit-status: 0
+        stdout: []
+        stderr: []
+        timeout: 0
+    crictl images | grep -v 'IMAGE ID' | awk -F'[ /]' '{print $3}' | sed 's/-amd64//g' | sort:
+        exit-status: 0
+        stdout:
+            - coredns
+            - etcd
+            - kube-apiserver
+            - kube-controller-manager
+            - kube-proxy
+            - kube-scheduler
+            - pause
+        stderr: []
+        timeout: 0
+    crictl ps:
+        exit-status: 0
+        stdout: []
+        stderr: []
+        timeout: 0
+    kubeadm version -o json | jq .clientVersion.gitVersion | tr -d '"' | awk '{print substr($1,2); }':
+        exit-status: 0
+        stdout:
+            - 1.26.8+vmware.1
+        stderr: []
+        timeout: 0
+    kubectl version --short --client=true -o json | jq .clientVersion.gitVersion | tr -d '"' | awk '{print substr($1,2); }':
+        exit-status: 0
+        stdout:
+            - 1.26.8+vmware.1
+        stderr: []
+        timeout: 0
+    kubelet --version | awk -F' ' '{print $2}'  | tr -d '"' | awk '{print substr($1,2); }':
+        exit-status: 0
+        stdout:
+            - 1.26.8+vmware.1
+        stderr: []
+        timeout: 0
+kernel-param:
+    fs.file-max:
+        value: "9223372036854775807"
+    net.bridge.bridge-nf-call-ip6tables:
+        value: "1"
+    net.bridge.bridge-nf-call-iptables:
+        value: "1"
+    net.ipv4.conf.all.rp_filter:
+        value: "1"
+    net.ipv4.ip_forward:
+        value: "1"
+    net.ipv4.tcp_congestion_control:
+        value: bbr
+    net.ipv6.conf.all.disable_ipv6:
+        value: "0"
+    net.ipv6.conf.all.forwarding:
+        value: "1"

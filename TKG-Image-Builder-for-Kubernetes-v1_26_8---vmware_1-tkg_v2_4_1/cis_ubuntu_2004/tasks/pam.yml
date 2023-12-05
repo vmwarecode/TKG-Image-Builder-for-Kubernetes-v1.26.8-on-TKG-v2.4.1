@@ -1,0 +1,19 @@
+- name: "pam: common-auth deny"
+  lineinfile:
+    dest: /etc/pam.d/common-auth
+    line: auth required pam_tally2.so onerr=fail audit silent deny=5 unlock_time=900
+    state: present
+    insertafter: EOF
+
+- name: "pam: common-password remember"
+  lineinfile:
+    dest: /etc/pam.d/common-password
+    line: password required pam_pwhistory.so remember=5
+    state: present
+    insertafter: EOF
+
+- name: "pam: common-account pam_tally2"
+  lineinfile:
+    dest: /etc/pam.d/common-account
+    line: account required pam_tally2.so
+    state: present

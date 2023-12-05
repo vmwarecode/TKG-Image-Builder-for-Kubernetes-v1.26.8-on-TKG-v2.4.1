@@ -1,0 +1,25 @@
+---
+- name: Ensure reverse path filtering is set as strict
+  sysctl:
+    name: net.ipv4.conf.all.rp_filter
+    value: "1"
+    state: present
+    sysctl_set: yes
+    reload: yes
+
+- name: Modify /bin/sh to point to bash instead of dash
+  shell: "{{ item }}"
+  with_items:
+    - echo "dash dash/sh boolean false" |  debconf-set-selections
+    - DEBIAN_FRONTEND=noninteractive dpkg-reconfigure dash
+
+- name: remove unwanted packages
+  apt:
+    force_apt_get: True
+    update_cache: True
+    name: "{{ rm_debs }}"
+    state: absent
+  register: apt_lock_status
+  until: apt_lock_status is not failed
+  retries: 5
+  delay: 10

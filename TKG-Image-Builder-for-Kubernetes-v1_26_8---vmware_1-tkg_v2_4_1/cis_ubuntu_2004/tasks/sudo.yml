@@ -1,0 +1,17 @@
+- name: "sudo: journald compress"
+  lineinfile:
+    dest: /etc/sudoers
+    line: Defaults use_pty
+
+- name: "sudo: create log file"
+  file:
+    path: /var/log/sudo.log
+    owner: root
+    group: root
+    mode: "0640"
+    state: touch
+    
+- name: "sudo: log setting in sudoers"
+  lineinfile:
+    dest: /etc/sudoers
+    line: Defaults logfile="/var/log/sudo.log"

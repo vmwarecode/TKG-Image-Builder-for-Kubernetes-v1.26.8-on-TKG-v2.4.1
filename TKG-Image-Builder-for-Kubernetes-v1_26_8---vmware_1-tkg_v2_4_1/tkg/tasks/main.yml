@@ -1,0 +1,32 @@
+---
+- name: Create /tkg-tmp space
+  mount:
+    path: /tkg-tmp
+    src: "tmpfs"
+    fstype: tmpfs
+    state: mounted
+    fstab: /tmp/tmp.fstab
+
+- import_tasks: ubuntu.yml
+  when: ansible_distribution == "Ubuntu"
+
+- import_tasks: amazon-2.yml
+  when: ansible_distribution == "Amazon"
+
+- include_tasks: vsphere.yml
+  when: packer_builder_type is search('vmware') or
+        packer_builder_type is search('vsphere')
+
+- include_tasks: aws.yml
+  when: packer_builder_type.startswith('amazon')
+
+- include_tasks: azure.yml
+  when: packer_builder_type.startswith('azure')
+
+- name: Ensure fs.file-max is set
+  sysctl:
+    name: fs.file-max
+    value: "9223372036854775807"
+    state: present
+    sysctl_set: yes
+    reload: yes

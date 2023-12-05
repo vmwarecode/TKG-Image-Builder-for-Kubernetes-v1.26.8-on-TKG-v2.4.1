@@ -1,0 +1,23 @@
+- name: "banner: motd"
+  file:
+    path: /etc/motd
+    owner: root
+    group: root
+    mode: "0644"
+    state: touch
+
+- name: "banner: local warning banner"
+  copy:
+    content: "{{ login_banner }}"
+    dest: /etc/issue
+    owner: root
+    group: root
+
+- name: "banner: remote warning banner"
+  copy:
+    content: "{{ login_banner }}"
+    dest: /etc/issue.net
+    owner: root
+    group: root
+  tags:
+  - medium

@@ -1,0 +1,8 @@
+---
+- name: Remove disallowed packages
+  yum:
+    name: "{{ packages }}"
+    state: absent
+  vars:
+    packages:
+    - postfix

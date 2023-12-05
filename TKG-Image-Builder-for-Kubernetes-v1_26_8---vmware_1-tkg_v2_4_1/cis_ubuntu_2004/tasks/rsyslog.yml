@@ -1,0 +1,7 @@
+- name: "rsyslog: add host"
+  lineinfile:
+    path:  /etc/rsyslog.conf
+    line: "*.* @@{{ syslog_host }}:{{ syslog_port }}"
+  when: syslog_host != "" and syslog_port != ""
+  notify:
+    - restart rsyslog

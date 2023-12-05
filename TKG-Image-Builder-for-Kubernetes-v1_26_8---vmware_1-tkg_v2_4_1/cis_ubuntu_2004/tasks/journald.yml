@@ -1,0 +1,20 @@
+- name: "journald: ForwardToSyslog"
+  lineinfile:
+    dest: /etc/systemd/journald.conf
+    regex: "^[#]?ForwardToSyslog"
+    line: ForwardToSyslog=yes
+  when:
+    forward_journald_to_syslog
+    
+- name: "journald: Compress"
+  lineinfile:
+    dest: /etc/systemd/journald.conf
+    regex: "^[#]?Compress"
+    line: Compress=yes
+
+- name: "journald: Storage"
+  lineinfile:
+    dest: /etc/systemd/journald.conf
+    regex: "^[#]?Storage"
+    line: Storage=persistent
+ 

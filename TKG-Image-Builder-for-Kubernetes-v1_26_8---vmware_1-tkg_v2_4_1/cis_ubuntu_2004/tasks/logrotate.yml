@@ -1,0 +1,12 @@
+- name:  "logrotate: get files"
+  command: |
+    grep -lREs '^\s*create\s+\S+' /etc/logrotate.conf /etc/logrotate.d/
+  ignore_errors: yes
+  register: files
+  
+- name: " logrotate: set file permission"
+  lineinfile:
+    path: "{{ item }}"
+    regex: create\s+(\d+)\s+([^ ]+)\s+([^ ]+)
+    line: create 0640 \2 \3
+  with_items: "{{ files.stdout_lines | unique }}"

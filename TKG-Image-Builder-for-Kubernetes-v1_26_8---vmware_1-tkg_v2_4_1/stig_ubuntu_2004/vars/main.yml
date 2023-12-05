@@ -1,0 +1,117 @@
+# V-238363: The Ubuntu operating system must implement NIST FIPS-validated
+# cryptography to protect classified information.
+install_fips: no
+
+# V-238371: The Ubuntu operating system must use a file integrity tool to verify 
+# correct operation of all security functions.
+install_aide: no
+
+### Standard config that is used for GOV
+sshd_login_banner_usa: |
+  You are accessing a U.S. Government (USG) Information System (IS) that is
+  provided for USG-authorized use only.
+  By using this IS (which includes any device attached to this IS), you consent
+  to the following conditions:
+  -The USG routinely intercepts and monitors communications on this IS for
+  purposes including, but not limited to, penetration testing, COMSEC monitoring,
+  network operations and defense, personnel misconduct (PM), law enforcement
+  (LE), and counterintelligence (CI) investigations.
+  -At any time, the USG may inspect and seize data stored on this IS.
+  -Communications using, or data stored on, this IS are not private, are subject
+  to routine monitoring, interception, and search, and may be disclosed or used
+  for any USG-authorized purpose.
+  -This IS includes security measures (e.g., authentication and access controls)
+  to protect USG interests--not for your personal benefit or privacy.
+  -Notwithstanding the above, using this IS does not constitute consent to PM, LE
+  or CI investigative searching or monitoring of the content of privileged
+  communications, or work product, related to personal representation or services
+  by attorneys, psychotherapists, or clergy, and their assistants. Such
+  communications and work product are private and confidential. See User
+  Agreement for details.
+
+# V-238214: The Ubuntu operating system must display the Standard Mandatory DoD Notice and Consent 
+# Banner before granting any local or remote connection to the system.
+install_sshd_login_banner: no
+
+# V-238357: The Ubuntu operating system must synchronize internal information
+# system clocks to the authoritative time source when the time difference is greater than one second.
+install_chrony: yes
+chrony_time_sources:
+- 169.254.169.123
+
+# V-238306: The Ubuntu operating system audit event multiplexor must be configured to off-load audit 
+# logs onto a different system or storage media from the system being audited.
+install_audispd_plugins: yes
+
+# V-238370: The Ubuntu operating system must be configured so that Advance Package Tool (APT) removes 
+# all software components after updated versions have been installed.
+install_unattended_upgrades: yes
+
+
+# V-238364: The Ubuntu operating system must use DoD PKI-established certificate authorities 
+# for verification of the establishment of protected sessions.
+remove_existing_ca_certs: no
+
+set_sshd_config_ciphers: yes
+set_sshd_config_macs: yes
+hold_packages: yes
+
+offline_install: "{{ lookup('env','OFFLINE_INSTALL') == 'yes' }}"
+offline_install: "{{ lookup('env','OFFLINE_INSTALL') == 'yes' }}"
+
+install_packages:
+- apparmor
+- apparmor-profiles
+- apparmor-utils
+- auditd
+- ca-certificates
+- libpam-pkcs11
+- libpam-pwquality
+- libpwquality-common
+- opensc-pkcs11
+- openssh-client
+- openssh-server
+- ufw
+- vlock
+remove_packages:
+- rsh-server
+- telnetd
+- tftpd
+- nis
+- at
+- landscape-client
+- landscape-common
+- mlocate
+- pollinate
+- postfix
+- screen
+- byobu
+- os-prober
+faillock_conf: |
+  audit
+  silent
+  deny = 3
+  fail_interval = 900
+  unlock_time = 0
+limits_maxlogins: 10
+autologout_timeout: 600
+pam_fail_delay: 4
+audit_tools:
+- /sbin/audispd
+- /sbin/auditctl
+- /sbin/auditd
+- /sbin/augenrules
+- /sbin/aureport
+- /sbin/ausearch
+- /sbin/autrace
+usb_storage: |
+  install usb-storage /bin/true
+  blacklist usb-storage
+audit_sp_remote_server: 192.0.0.1
+
+# Dummy password bc this is parsed even when not using advantage/fips
+UBUNTU_ADVANTAGE_PASSWORD: abcd
+hold_packages: yes
+packer_builder_type: none
+
+install_protect_kernel_defaults: no

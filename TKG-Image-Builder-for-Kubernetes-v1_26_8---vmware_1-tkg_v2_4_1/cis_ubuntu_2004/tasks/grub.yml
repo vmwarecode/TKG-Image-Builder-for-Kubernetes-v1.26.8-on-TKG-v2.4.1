@@ -1,0 +1,51 @@
+- name: "grub: permissions on bootloader config"
+  lineinfile:
+    dest: /usr/sbin/grub-mkconfig
+    regexp: 'chmod 444 \${grub_cfg}\.new\s+\|\|\s+true'
+    line: chmod 400 ${grub_cfg}.new || true
+  notify:
+    - update-grub
+
+- name: "grub: allow reboot"
+  lineinfile:
+    dest: /etc/grub.d/10_linux
+    regexp: '(CLASS="--class\s+gnu-linux.*)"'
+    backrefs: yes
+    line: \1 --unrestricted"
+  notify:
+    - update-grub
+
+- name: "grub: grub password"
+  copy:
+    src: files/grub_password
+    dest: /etc/grub.d
+    group: root
+    owner: root
+    mode: 0755
+  notify:
+    - update-grub
+
+- name: "grub: grub.cfg permission"
+  file:
+    path: /boot/grub/grub.cfg
+    group: root
+    owner: root
+    mode: 0400
+  notify:
+    - update-grub
+
+- name: "grub: apparmor/audit"
+  lineinfile:
+    dest: /etc/default/grub 
+    regex: "^GRUB_CMDLINE_LINUX="
+    line: GRUB_CMDLINE_LINUX="apparmor=1 security=apparmor audit=1 audit_backlog_limit=8192"
+  notify:
+    - update-grub
+
+- name: "grub: disable dual boot"
+  lineinfile:
+    path: "/etc/default/grub"
+    line: GRUB_DISABLE_OS_PROBER=true
+    insertbefore: EOF
+  notify:
+    - update-grub

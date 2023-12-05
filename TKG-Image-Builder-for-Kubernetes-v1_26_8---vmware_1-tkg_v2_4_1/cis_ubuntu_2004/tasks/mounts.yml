@@ -1,0 +1,33 @@
+- name: "mount: /tmp"
+  copy:
+    src:  /usr/share/systemd/tmp.mount
+    dest:  /etc/systemd/system
+    remote_src: yes
+    group: root
+    owner: root
+    mode: 0644
+
+- name:  "mount: /tmp system/tmp.mount" 
+  lineinfile:
+    dest: /etc/systemd/system/tmp.mount
+    regexp: '^Options='
+    line: Options=mode=1777,strictatime,nosuid,nodev,noexec
+
+- name: "mount: tmp.mount"
+  systemd:
+    name: tmp.mount 
+    state: started
+    enabled: yes
+    daemon_reload: yes
+    
+- name:  "mount: /var/tmp"
+  lineinfile:
+    dest: /etc/fstab
+    regexp: '^\/tmp \/var\/tmp .*[ |,]bind[ |,]'
+    line: /tmp /var/tmp none rw,noexec,nosuid,nodev,bind 0 0
+
+- name:  "mount: /dev/shm"
+  lineinfile:
+    dest: /etc/fstab
+    regexp: 'tmpfs[\s]+\/dev\/shm'
+    line: tmpfs /dev/shm tmpfs defaults,nodev,nosuid,noexec 0 0

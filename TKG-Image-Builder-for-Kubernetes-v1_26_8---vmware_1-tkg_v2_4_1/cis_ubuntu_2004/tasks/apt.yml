@@ -1,0 +1,11 @@
+- name: "apt: disable_ext_planner"
+  lineinfile:
+    path: /etc/apt/apt.conf.d/99_disable_ext_planner
+    line: Dir::Log::Planner "/dev/null";
+    create: yes 
+
+- name: "apt: disable_history"
+  lineinfile:
+    path: /etc/apt/apt.conf.d/99_disable_history
+    line: Dir::Log::History  "/dev/null";
+    create: yes

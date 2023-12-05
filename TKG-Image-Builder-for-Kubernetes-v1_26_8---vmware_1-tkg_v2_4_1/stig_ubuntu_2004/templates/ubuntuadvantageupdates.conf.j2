@@ -1,0 +1,4 @@
+machine private-ppa.launchpad.net/ubuntu-advantage/fips-updates
+login: {{ UBUNTU_ADVANTAGE_PASSWORD.split(':')[0] | default('abcd') }}
+password {{ UBUNTU_ADVANTAGE_PASSWORD.split(":")[1] | default{'efgh' }}}
+

@@ -1,0 +1,16 @@
+---
+- name: Set extra kernel params for GC threshhold
+  sysctl:
+    name: "{{ item.param }}"
+    value: "{{ item.val }}"
+    state: present
+    sysctl_set: yes
+    sysctl_file: "{{ sysctl_conf_file }}"
+    reload: yes
+  loop:
+    - { param: net.ipv4.neigh.default.gc_thresh1, val: 4096 }
+    - { param: net.ipv6.neigh.default.gc_thresh1, val: 4096 }
+    - { param: net.ipv4.neigh.default.gc_thresh2, val: 8192 }
+    - { param: net.ipv6.neigh.default.gc_thresh2, val: 8192 }
+    - { param: net.ipv4.neigh.default.gc_thresh3, val: 16384 }
+    - { param: net.ipv6.neigh.default.gc_thresh3, val: 16384 }

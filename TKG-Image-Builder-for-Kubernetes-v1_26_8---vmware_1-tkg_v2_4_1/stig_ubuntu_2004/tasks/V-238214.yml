@@ -1,0 +1,9 @@
+- name: V-238214
+  copy:
+    content: "{{ sshd_login_banner_usa }}"
+    dest: /etc/issue.net
+    owner: root
+    group: root
+  when: install_sshd_login_banner| bool
+  tags:
+  - medium
